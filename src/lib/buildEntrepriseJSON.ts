@@ -1,30 +1,6 @@
 type InpiData = Record<string, unknown> | null;
-type PappersData = {
-  siren?: string;
-  nom_entreprise?: string;
-  denomination?: string;
-  forme_juridique?: string;
-  capital?: number | null;
-  date_creation?: string;
-  code_naf?: string;
-  libelle_code_naf?: string;
-  greffe?: string;
-  numero_rcs?: string;
-  siege?: {
-    adresse_ligne_1?: string;
-    code_postal?: string;
-    ville?: string;
-    effectif?: string;
-  };
-  effectif?: string;
-  annee_effectif?: number;
-  representants?: Array<Record<string, unknown>>;
-  finances?: Array<Record<string, unknown>>;
-  publications_bodacc?: Array<Record<string, unknown>>;
-} | null;
-type BodaccData = {
-  procedures?: Array<Record<string, unknown>>;
-} | null;
+type PappersData = Record<string, unknown> | null;
+type BodaccData = Record<string, unknown> | null;
 
 export function buildEntrepriseJSON(
   inpi: InpiData,
@@ -35,61 +11,80 @@ export function buildEntrepriseJSON(
   return {
     identite: {
       siret,
-      siren: pappers?.siren || (inpi as any)?.siren || null,
-      denomination: pappers?.nom_entreprise || pappers?.denomination || null,
-      forme_juridique: pappers?.forme_juridique || null,
-      capital: pappers?.capital || null,
-      date_creation: pappers?.date_creation || null,
-      code_naf: pappers?.code_naf || null,
-      libelle_naf: pappers?.libelle_code_naf || null,
-      greffe: pappers?.greffe || null,
-      rcs: pappers?.numero_rcs || null,
+      siren: (pappers?.["siren"] as string) || (inpi?.["siren"] as string) || null,
+      denomination:
+        (pappers?.["nom_entreprise"] as string) ||
+        (pappers?.["denomination"] as string) ||
+        null,
+      forme_juridique: (pappers?.["forme_juridique"] as string) || null,
+      capital: (pappers?.["capital"] as number) || null,
+      date_creation: (pappers?.["date_creation"] as string) || null,
+      code_naf: (pappers?.["code_naf"] as string) || null,
+      libelle_naf: (pappers?.["libelle_code_naf"] as string) || null,
+      greffe: (pappers?.["greffe"] as string) || null,
+      rcs: (pappers?.["numero_rcs"] as string) || null,
       siege: {
-        adresse: pappers?.siege?.adresse_ligne_1 || null,
-        code_postal: pappers?.siege?.code_postal || null,
-        ville: pappers?.siege?.ville || null,
-        effectif: pappers?.effectif || pappers?.siege?.effectif || null,
-        annee_effectif: pappers?.annee_effectif || null
-      }
+        adresse:
+          (pappers?.["siege"] as Record<string, unknown>)?.[
+            "adresse_ligne_1"
+          ] || null,
+        code_postal:
+          (pappers?.["siege"] as Record<string, unknown>)?.["code_postal"] ||
+          null,
+        ville:
+          (pappers?.["siege"] as Record<string, unknown>)?.["ville"] || null,
+        effectif:
+          (pappers?.["effectif"] as string) ||
+          ((pappers?.["siege"] as Record<string, unknown>)?.["effectif"] as
+            string) ||
+          null,
+        annee_effectif: (pappers?.["annee_effectif"] as number) || null,
+      },
     },
-    dirigeants: (pappers?.representants || [])
+    dirigeants: ((pappers?.["representants"] as Array<Record<string, unknown>>) ||
+      []
+    )
       .slice(0, 3)
       .map((r) => ({
-        nom: (r as any).nom_complet,
-        fonction: (r as any).qualite,
-        date_prise_de_poste: (r as any).date_prise_de_poste || null,
-        age: (r as any).age || null,
-        nationalite: (r as any).nationalite || null
+        nom: r["nom_complet"] as string,
+        fonction: r["qualite"] as string,
+        date_prise_de_poste: (r["date_prise_de_poste"] as string) || null,
+        age: (r["age"] as number) || null,
+        nationalite: (r["nationalite"] as string) || null,
       })),
     finances: {
-      comptes_annuels: (pappers?.finances || [])
+      comptes_annuels: ((pappers?.["finances"] as Array<Record<string, unknown>>) ||
+        []
+      )
         .slice(0, 3)
         .map((f) => ({
-          annee: (f as any).annee,
-          chiffre_affaires: (f as any).chiffre_affaires,
-          resultat: (f as any).resultat,
-          marge_nette: (f as any).marge_nette,
-          fonds_propres: (f as any).fonds_propres,
-          dettes: (f as any).dettes_financieres
-        }))
+          annee: f["annee"] as number,
+          chiffre_affaires: f["chiffre_affaires"] as number,
+          resultat: f["resultat"] as number,
+          marge_nette: f["marge_nette"] as number,
+          fonds_propres: f["fonds_propres"] as number,
+          dettes: f["dettes_financieres"] as number,
+        })),
     },
-    publications_bodacc: (pappers?.publications_bodacc || [])
+    publications_bodacc: ((pappers?.["publications_bodacc"] as Array<
+      Record<string, unknown>
+    >) || [])
       .filter((p) =>
         ["Dépôt des comptes", "Procédure collective", "Modification"].includes(
-          (p as any).type
+          p["type"] as string
         )
       )
       .slice(0, 5)
       .map((p) => ({
-        date: (p as any).date,
-        type: (p as any).type,
-        descriptif: (p as any).descriptif || null
+        date: p["date"] as string,
+        type: p["type"] as string,
+        descriptif: (p["descriptif"] as string) || null,
       })),
-    procedures_collectives: (bodacc?.procedures || [])
-      .filter(
-        (p) =>
-          (p as any).type?.toLowerCase().includes("redressement") ||
-          (p as any).type?.toLowerCase().includes("liquidation")
-      )
+    procedures_collectives: ((bodacc?.["procedures"] as Array<
+      Record<string, unknown>
+    >) || []).filter((p) => {
+      const type = (p["type"] as string)?.toLowerCase();
+      return type?.includes("redressement") || type?.includes("liquidation");
+    }),
   };
 }

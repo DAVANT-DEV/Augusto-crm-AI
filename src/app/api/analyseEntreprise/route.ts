@@ -19,20 +19,23 @@ export async function GET(req: NextRequest) {
     // ✅ Extraire SIREN pour INPI
     const siren = siret.slice(0, 9);
 
-    // ✅ Appels aux APIs
+    // ✅ Appels aux APIs externes
     const [inpiRes, pappersRes, bodaccRes] = await Promise.allSettled([
       fetch(`https://inpi-crm-project.vercel.app/api/companies?siren=${siren}`),
       fetch(`https://pappers-vercel.vercel.app/api/enrichir?siret=${siret}`),
-      fetch(`https://vercel-bodacc.vercel.app/api/bodacc?id=${siret}`)
+      fetch(`https://vercel-bodacc.vercel.app/api/bodacc?id=${siret}`),
     ]);
 
     console.log("INPI status:", inpiRes.status);
     console.log("Pappers status:", pappersRes.status);
     console.log("BODACC status:", bodaccRes.status);
 
-    const inpi = inpiRes.status === "fulfilled" ? await inpiRes.value.json() : null;
-    const pappers = pappersRes.status === "fulfilled" ? await pappersRes.value.json() : null;
-    const bodacc = bodaccRes.status === "fulfilled" ? await bodaccRes.value.json() : null;
+    const inpi =
+      inpiRes.status === "fulfilled" ? await inpiRes.value.json() : null;
+    const pappers =
+      pappersRes.status === "fulfilled" ? await pappersRes.value.json() : null;
+    const bodacc =
+      bodaccRes.status === "fulfilled" ? await bodaccRes.value.json() : null;
 
     // ✅ Construire le JSON enrichi compact
     const entreprise = buildEntrepriseJSON(inpi, pappers, bodacc, siret);
@@ -73,7 +76,12 @@ ${JSON.stringify(entreprise, null, 2)}
 
     return NextResponse.json(JSON.parse(output));
   } catch (error: unknown) {
-    console.error("Erreur API analyseEntreprise:", error);
+    if (error instanceof Error) {
+      console.error("Erreur API analyseEntreprise:", error.message);
+    } else {
+      console.error("Erreur API analyseEntreprise:", error);
+    }
+
     return NextResponse.json(
       { error: "Erreur interne" },
       { status: 500 }
