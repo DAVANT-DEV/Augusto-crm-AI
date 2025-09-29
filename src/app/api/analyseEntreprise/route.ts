@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { buildEntrepriseJSON } from "@/lib/buildEntrepriseJSON"; // ✅ ton JSON enrichi
+import { buildEntrepriseJSON } from "@/lib/buildEntrepriseJSON";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -72,8 +72,11 @@ ${JSON.stringify(entreprise, null, 2)}
     }
 
     return NextResponse.json(JSON.parse(output));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erreur API analyseEntreprise:", error);
-    return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur interne" },
+      { status: 500 }
+    );
   }
 }
