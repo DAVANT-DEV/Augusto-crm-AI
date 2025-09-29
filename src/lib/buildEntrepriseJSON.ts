@@ -39,6 +39,10 @@ export function buildEntrepriseJSON(
             string) ||
           null,
         annee_effectif: (pappers?.["annee_effectif"] as number) || null,
+        latitude:
+          (pappers?.["siege"] as Record<string, unknown>)?.["latitude"] || null,
+        longitude:
+          (pappers?.["siege"] as Record<string, unknown>)?.["longitude"] || null,
       },
     },
     dirigeants: ((pappers?.["representants"] as Array<Record<string, unknown>>) ||
