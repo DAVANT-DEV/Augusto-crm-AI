@@ -32,13 +32,18 @@ export async function GET(req: NextRequest) {
 
     // Prompt IA
     const prompt = `
-Contexte :
-Notre entreprise est DAVANT (marque Augusto Pizza).
-Clients typiques : hôtels, campings, commerces de proximité, clubs de sport, bars, caves à bière, stations-service, buralistes, casinos, golfs, restaurants et aires de loisirs.
+Contexte : 
+Notre entreprise est DAVANT, qui commercialise la marque Augusto Pizza, fournisseur de solutions de restauration clé en main. 
+Nous proposons les fours Augusto pizzas, une offre destinée aux professionnels souhaitant diversifier leur activité avec des pizzas artisanales de qualité. 
+Nos clients typiques : hôtels, campings, commerces de proximité, clubs de sport, bars, caves à bière, stations-service, buralistes, casinos, golfs, restaurants et aires de loisirs. 
+Nous offrons installation simple, formation, SAV, programme de fidélité et approvisionnement flexible. 
 
-Analyse les données suivantes et réponds uniquement en JSON avec deux clés :
-- "score" : un entier entre 0 et 100 reflétant la pertinence comme partenaire.
-- "analyse" : un texte concis (3-4 phrases) direct et factuel.
+Analyse les données suivantes (issues d'INPI, Pappers, BODACC) et réponds uniquement au format JSON avec deux clés :
+- "score" : un entier entre 0 et 100 reflétant la pertinence de l’entreprise comme partenaire potentiel pour DAVANT.
+- "analyse" : un texte concis de 3 à 4 phrases maximum, direct et factuel. 
+Le texte doit couvrir structure, finances, risques éventuels et pertinence vis-à-vis de DAVANT.
+
+Ne mets rien d’autre que ce JSON.
 
 Données :
 ${JSON.stringify(entreprise, null, 2)}
